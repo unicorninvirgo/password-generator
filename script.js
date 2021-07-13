@@ -10,6 +10,7 @@ var userPasswordChoice = {
   hasLowerCase: false,
   hasNumbers: false,
   hasSpecialCharacters: false,
+  passwordChoice: "",
 
   //check if user password choices are valid
   isValid: function(){
@@ -22,7 +23,43 @@ var userPasswordChoice = {
         }
     },
 
+    generatePassword: function(){
+    
+      var characters = "";
+      var genPassword = "";
+
+      console.log(this.hasUpperCase);
+      console.log(this.hasLowerCase);
+      console.log(this.hasNumbers);
+      console.log(this.hasSpecialCharacters);
+   
+
+      //append user selection to generate password
+      this.hasLowerCase ? (characters += userPassword.lowerCase) : "";
+      this.hasUpperCase ? (characters += userPassword.upperCase) : "";
+      this.hasNumbers ? (characters += userPassword.numbers) : "";
+      this.hasSpecialCharacters ? (characters += userPassword.specialChars) : "";
+
+      //randomly generate paswword
+      for (let i = 0; i < this.passwordLength; i++) {
+            genPassword += characters.charAt(
+              Math.floor(Math.random() * characters.length)
+            );
+          }
+
+      console.log(genPassword);
+      return genPassword;
+    },
+
+    initializeUserPassword: function(){
+      hasUpperCase = false;
+      hasLowerCase = false;
+      hasNumbers = false;
+      hasSpecialCharacters = false;
+    }
+
 }
+
 
 //password object
 var userPassword = {
@@ -33,11 +70,18 @@ var userPassword = {
   lowerCase: "abcdefghijklmnopqrstuvwxyz",
   upperCase: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
   numbers: "0123456789",
-  specialChars: "!@#$%^&*_-+=",
+  specialChars: "~()`!@#$%^&*_-+=",
 
   //check if number is valid
   validNumber: function(pword){
-      return Number.isNaN(pword);
+    
+    if(isNaN(pword))
+    {
+      return false;
+    }
+    else{
+      return true;
+    }
   },
 
   //check is number is valid length
@@ -57,28 +101,9 @@ var userPassword = {
     alert("Please enter a number between 8 and 128");
     return;
   }
+
 }
 
-
-var userGeneratedPassword = function(){
-
-   var characters = "";
-   var genPassword = "";
-
-   //
-   userPasswordChoice.hasLowerCase ? (characters += userPassword.lowerCase) : "";
-   userPasswordChoice.hasUpperCase ? (characters += userPassword.upperCase) : "";
-   userPasswordChoice.hasNumbers ? (characters += userPassword.numbers) : "";
-   userPasswordChoice.hasSpecialCharacters ? (characters += userPassword.specialChars) : "";
-
-   for (let i = 0; i < userPasswordChoice.passwordLength; i++) {
-        genPassword += characters.charAt(
-          Math.floor(Math.random() * characters.length)
-        );
-      }
-
-  return genPassword;
-}
 
  //prompt user for choices
  function captureUserPasswordChoices(){
@@ -90,6 +115,10 @@ var userGeneratedPassword = function(){
     userPasswordChoice.hasUpperCase = true;
     userPasswordChoice.selectionCount++;
   }
+  else
+  {
+    userPasswordChoice.hasUpperCase = false;
+  }
 
 //lowerCase choice
   var confirmLowerCase = confirm("Do you want lowercase letters?");
@@ -97,6 +126,10 @@ var userGeneratedPassword = function(){
   {
     userPasswordChoice.hasLowerCase = true;
     userPasswordChoice.selectionCount++;
+  }
+  else
+  {
+    userPasswordChoice.hasLowerCase = false;
   }
 
 //number choice
@@ -106,6 +139,10 @@ var userGeneratedPassword = function(){
     userPasswordChoice.hasNumbers = true;
     userPasswordChoice.selectionCount++;
   }
+  else
+  {
+    userPasswordChoice.hasNumbers = false;
+  }
 
   //special character choice
   var confirmSpecialChars = confirm("Do you want special characters?");
@@ -114,23 +151,28 @@ var userGeneratedPassword = function(){
     userPasswordChoice.hasSpecialCharacters = true;
     userPasswordChoice.selectionCount++;
   }
+  else
+  {
+    userPasswordChoice.hasSpecialCharacters = false;
+  }
 }
 
 //validate user entered values
 var validateUserEntry = function(userEntry){
+
+  var userValue = parseInt(userEntry);
   
+
   //checkk for number and length
-  if(!isAValidNumber(userEntry) && !isValidLength(userEntry))
-  {
-    return false;
-  }
-  else
+  if(isAValidNumber(userValue)  && isValidLength(userValue))
   {
     return true;
   }
+  else{
+    return false;
+  }
 
 }
-
 
 //check if entry is a number
 var isAValidNumber = function(userEntry){
@@ -142,36 +184,49 @@ var isValidLength = function(userEntry){
   return userPassword.validPasswordLength(userEntry);
 }
 
+//check if user selected atleast 1 type
+var hasValidTypeSelection = function(){
+  return userPasswordChoice.isValid();
+}
+
+//
+var displayPassword = function(){
+
+  if(hasValidTypeSelection()){
+    return userPasswordChoice.generatePassword();
+  }
+  else{
+    alert("You must select atleast one password type.");
+    return;
+  }
+
+}
+
 //create password
 function generatePassword(){
   
-    var userEntry = prompt("How long do you want your password to be?","Please select a number between 8 and 128");
     
-    //convert user entered value to number
-    userEntry = parseInt(userEntry);
+    var userEntry = prompt("How long do you want your password to be?","Please select a number between 8 and 128");
+    userPasswordChoice.initializeUserPassword();
 
     //check if value entered is numeric
     if(!validateUserEntry(userEntry))
     {
       userPassword.errorInvalidNumberMessage();
+      writePassword();
     }
     else
     {
         userPasswordChoice.passwordLength = userEntry;
-        //validate userPasswordChoices
+        
+        //prompt and store user password config choices
         captureUserPasswordChoices();
-
-        if(userPasswordChoice.isValid()){
-          return userGeneratedPassword();
-        }
-        else{
-          alert("You must select atleast one password type.");
-          return;
-        }
+        
+        //return password
+        return displayPassword();
     }
 
 }
-
 
 // Write password to the #password input
 function writePassword() {
